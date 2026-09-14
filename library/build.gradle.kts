@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.vanniktech.mavenPublish)
+    `maven-publish`
 }
 
 group = "io.github.kotlin"
@@ -71,6 +72,24 @@ mavenPublishing {
             url = "XXX"
             connection = "YYY"
             developerConnection = "ZZZ"
+        }
+    }
+}
+
+// Dual-publish to GitHub Packages (also keep Maven Central / vanniktech when configured)
+publishing {
+    repositories {
+        val ghActor = providers.environmentVariable("GITHUB_ACTOR")
+        val ghToken = providers.environmentVariable("GITHUB_TOKEN")
+        if (ghActor.isPresent && ghToken.isPresent) {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/KolektivComputer/konfy")
+                credentials {
+                    username = ghActor.get()
+                    password = ghToken.get()
+                }
+            }
         }
     }
 }
